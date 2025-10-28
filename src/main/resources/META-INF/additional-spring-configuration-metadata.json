@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "app.nombre",
+      "type": "java.lang.String",
+      "description": "Nombre de la aplicación SERF"
+    },
+    {
+      "name": "app.version",
+      "type": "java.lang.String",
+      "description": "Versión de la aplicación SERF"
+    }
+  ]
+}

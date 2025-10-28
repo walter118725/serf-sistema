@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-SerfApplication<serf-sistema>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.financorp.serf.SerfApplication",
+            "projectName": "serf-sistema",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

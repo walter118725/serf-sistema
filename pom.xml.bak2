@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>    <modelVersion>4.0.0</modelVersion>
+
+        <parent>
+
+    <parent>        <groupId>org.springframework.boot</groupId>
+
+        <groupId>org.springframework.boot</groupId>        <artifactId>spring-boot-starter-parent</artifactId>
+
+        <artifactId>spring-boot-starter-parent</artifactId>        <version>2.7.14</version>
+
+        <version>2.7.17</version>        <relativePath/>
+
+        <relativePath/> <!-- lookup parent from repository -->    </parent>
+
+    </parent>
+
+        <groupId>com.financorp</groupId>
+
+    <groupId>com.financorp</groupId>    <artifactId>serf-sistema</artifactId>
+
+    <artifactId>serf-sistema</artifactId>    <version>1.0.0</version>
+
+    <version>1.0.0</version>    <name>SERF Sistema</name>
+
+    <name>serf-sistema</name>    <description>Sistema de Reportes Financieros</description>
+
+    <description>Sistema de Reportes Financieros</description>
+
+    <properties>
+
+    <properties>        <java.version>17</java.version>
+
+        <java.version>11</java.version>        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    </properties>
+
+        <lombok.version>1.18.30</lombok.version>
+
+    </properties>    <dependencies>
+
+        <!-- Spring Boot Starters -->
+
+    <dependencies>        <dependency>
+
+        <!-- Spring Boot -->            <groupId>org.springframework.boot</groupId>
+
+        <dependency>            <artifactId>spring-boot-starter-web</artifactId>
+
+            <groupId>org.springframework.boot</groupId>        </dependency>
+
+            <artifactId>spring-boot-starter-web</artifactId>        <dependency>
+
+        </dependency>            <groupId>org.springframework.boot</groupId>
+
+        <dependency>            <artifactId>spring-boot-starter-data-jpa</artifactId>
+
+            <groupId>org.springframework.boot</groupId>        </dependency>
+
+            <artifactId>spring-boot-starter-data-jpa</artifactId>        <dependency>
+
+        </dependency>            <groupId>org.springframework.boot</groupId>
+
+        <dependency>            <artifactId>spring-boot-starter-validation</artifactId>
+
+            <groupId>org.springframework.boot</groupId>        </dependency>
+
+            <artifactId>spring-boot-starter-validation</artifactId>
+
+        </dependency>        <!-- Base de datos -->
+
+        <dependency>
+
+        <!-- Database -->            <groupId>com.h2database</groupId>
+
+        <dependency>            <artifactId>h2</artifactId>
+
+            <groupId>com.h2database</groupId>            <scope>runtime</scope>
+
+            <artifactId>h2</artifactId>        </dependency>
+
+            <scope>runtime</scope>
+
+        </dependency>        <!-- Hibernate -->
+
+        <!-- Lombok -->
+
+        <!-- Lombok -->        <dependency>
+
+        <dependency>            <groupId>org.projectlombok</groupId>
+
+            <groupId>org.projectlombok</groupId>            <artifactId>lombok</artifactId>
+
+            <artifactId>lombok</artifactId>            <optional>true</optional>
+
+            <version>${lombok.version}</version>        </dependency>
+
+            <scope>provided</scope>
+
+        </dependency>        <!-- Test -->
+
+        <dependency>
+
+        <!-- Test -->            <groupId>org.springframework.boot</groupId>
+
+        <dependency>            <artifactId>spring-boot-starter-test</artifactId>
+
+            <groupId>org.springframework.boot</groupId>            <scope>test</scope>
+
+            <artifactId>spring-boot-starter-test</artifactId>        </dependency>
+
+            <scope>test</scope>    </dependencies>
+
+            <exclusions>
+
+                <exclusion>    <build>
+
+                    <groupId>org.junit.vintage</groupId>        <plugins>
+
+                    <artifactId>junit-vintage-engine</artifactId>            <plugin>
+
+                </exclusion>                <groupId>org.springframework.boot</groupId>
+
+            </exclusions>                <artifactId>spring-boot-maven-plugin</artifactId>
+
+        </dependency>                <configuration>
+
+    </dependencies>                    <excludes>
+
+                        <exclude>
+
+    <build>                            <groupId>org.projectlombok</groupId>
+
+        <plugins>                            <artifactId>lombok</artifactId>
+
+            <!-- Spring Boot Maven Plugin -->                        </exclude>
+
+            <plugin>                    </excludes>
+
+                <groupId>org.springframework.boot</groupId>                </configuration>
+
+                <artifactId>spring-boot-maven-plugin</artifactId>            </plugin>
+
+                <configuration>        </plugins>
+
+                    <excludes>    </build>
+
+                        <exclude></project>
+
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
