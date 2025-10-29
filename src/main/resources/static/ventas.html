@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas - SERF | FinanCorp</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>SERF</h1>
+                <p class="company-name">FinanCorp</p>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="/index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/productos.html" class="nav-link">
+                            <i class="fas fa-box"></i>
+                            <span>Productos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/ventas.html" class="nav-link active">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Ventas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/inventario.html" class="nav-link">
+                            <i class="fas fa-warehouse"></i>
+                            <span>Inventario</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/reportes.html" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reportes</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <h2 class="page-title">Gestión de Ventas</h2>
+                <div class="user-info">
+                    <button class="btn btn-primary" onclick="openAddSaleModal()">
+                        <i class="fas fa-plus"></i>
+                        Registrar Venta
+                    </button>
+                    <div class="user-avatar">FC</div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <section class="content">
+                <!-- Estadísticas de Ventas -->
+                <div class="stats-grid">
+                    <div class="stat-card sales">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Total Ventas</span>
+                            <i class="fas fa-dollar-sign stat-card-icon"></i>
+                        </div>
+                        <div class="stat-card-value" id="totalSalesAmount">$0.00</div>
+                        <p class="stat-card-description">Monto total acumulado</p>
+                    </div>
+
+                    <div class="stat-card info">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Transacciones</span>
+                            <i class="fas fa-receipt stat-card-icon"></i>
+                        </div>
+                        <div class="stat-card-value" id="totalTransactions">0</div>
+                        <p class="stat-card-description">Número de ventas</p>
+                    </div>
+
+                    <div class="stat-card success">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Promedio</span>
+                            <i class="fas fa-chart-line stat-card-icon"></i>
+                        </div>
+                        <div class="stat-card-value" id="averageSale">$0.00</div>
+                        <p class="stat-card-description">Por transacción</p>
+                    </div>
+
+                    <div class="stat-card products">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Unidades</span>
+                            <i class="fas fa-box-open stat-card-icon"></i>
+                        </div>
+                        <div class="stat-card-value" id="totalUnits">0</div>
+                        <p class="stat-card-description">Productos vendidos</p>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-bar">
+                            <select class="form-select" id="countryFilter" style="max-width: 200px;">
+                                <option value="">Todos los Países</option>
+                                <option value="PERU">Perú</option>
+                                <option value="MEXICO">México</option>
+                                <option value="ESPAÑA">España</option>
+                            </select>
+                            <input type="date" class="form-input" id="startDate" style="max-width: 200px;">
+                            <input type="date" class="form-input" id="endDate" style="max-width: 200px;">
+                            <button class="btn btn-primary" onclick="filterSales()">
+                                <i class="fas fa-filter"></i>
+                                Filtrar
+                            </button>
+                            <button class="btn btn-secondary" onclick="clearSalesFilters()">
+                                <i class="fas fa-times"></i>
+                                Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Ventas -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-list"></i>
+                            Historial de Ventas
+                        </h3>
+                        <span class="badge badge-info" id="salesCount">0 ventas</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="salesContent">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>&copy; 2024 FinanCorp - Sistema de Reportes Financieros (SERF) | Todos los derechos reservados</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Modal para Registrar Venta -->
+    <div class="modal-overlay" id="saleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Registrar Nueva Venta</h3>
+                <button class="modal-close" onclick="closeSaleModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="saleForm">
+                    <div class="form-group">
+                        <label class="form-label">Producto</label>
+                        <select class="form-select" id="saleProduct" required onchange="updateProductPrice()">
+                            <option value="">Seleccionar producto...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Cantidad</label>
+                            <input type="number" class="form-input" id="saleQuantity" min="1" value="1" required onchange="calculateTotal()">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Precio Unitario</label>
+                            <input type="number" class="form-input" id="saleUnitPrice" step="0.01" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">País</label>
+                            <select class="form-select" id="saleCountry" required onchange="updateCurrency()">
+                                <option value="">Seleccionar...</option>
+                                <option value="PERU">Perú</option>
+                                <option value="MEXICO">México</option>
+                                <option value="ESPAÑA">España</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Moneda</label>
+                            <input type="text" class="form-input" id="saleCurrency" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Fecha de Venta</label>
+                        <input type="date" class="form-input" id="saleDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Total</label>
+                        <input type="number" class="form-input" id="saleTotal" step="0.01" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSaleModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveSale()">
+                    <i class="fas fa-save"></i>
+                    Registrar Venta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/ventas.js"></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - SERF | FinanCorp</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>SERF</h1>
+                <p class="company-name">FinanCorp</p>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="/index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/productos.html" class="nav-link">
+                            <i class="fas fa-box"></i>
+                            <span>Productos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/ventas.html" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Ventas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/inventario.html" class="nav-link">
+                            <i class="fas fa-warehouse"></i>
+                            <span>Inventario</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/reportes.html" class="nav-link active">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reportes</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <h2 class="page-title">Generación de Reportes</h2>
+                <div class="user-info">
+                    <div class="user-avatar">FC</div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <section class="content">
+                <!-- Opciones de Reportes -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-cog"></i>
+                            Configurar Reporte
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="reportForm">
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Reporte</label>
+                                <select class="form-select" id="reportType" onchange="updateReportOptions()">
+                                    <option value="">Seleccionar tipo...</option>
+                                    <option value="ventas">Reporte de Ventas</option>
+                                    <option value="inventario">Reporte de Inventario</option>
+                                    <option value="consolidado">Reporte Consolidado</option>
+                                    <option value="seguro">Reporte Seguro (con decoradores)</option>
+                                </select>
+                            </div>
+
+                            <div id="countrySection" class="form-group" style="display: none;">
+                                <label class="form-label">País/Filial</label>
+                                <select class="form-select" id="reportCountry">
+                                    <option value="">Seleccionar país...</option>
+                                    <option value="PERU">Perú</option>
+                                    <option value="MEXICO">México</option>
+                                    <option value="ESPAÑA">España</option>
+                                </select>
+                            </div>
+
+                            <div id="securityOptions" style="display: none;">
+                                <div class="form-group">
+                                    <label class="form-label">Opciones de Seguridad</label>
+                                    <div class="d-flex" style="flex-direction: column; gap: 0.5rem;">
+                                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <input type="checkbox" id="addSignature">
+                                            <i class="fas fa-signature"></i>
+                                            Agregar Firma Digital
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <input type="checkbox" id="addWatermark">
+                                            <i class="fas fa-water"></i>
+                                            Agregar Marca de Agua
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <input type="checkbox" id="encryptReport">
+                                            <i class="fas fa-lock"></i>
+                                            Encriptar Reporte
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Patrones de Diseño Implementados:</strong>
+                                <ul style="margin: 0.5rem 0 0 1.5rem;">
+                                    <li><strong>Facade:</strong> Simplifica la generación de reportes complejos</li>
+                                    <li><strong>Builder:</strong> Construcción flexible de reportes personalizados</li>
+                                    <li><strong>Composite:</strong> Estructura jerárquica de secciones del reporte</li>
+                                    <li><strong>Decorator:</strong> Agrega funcionalidades de seguridad dinámicamente</li>
+                                    <li><strong>Prototype:</strong> Clona plantillas de reportes para diferentes países</li>
+                                </ul>
+                            </div>
+
+                            <div class="d-flex justify-between" style="margin-top: 1.5rem;">
+                                <button type="button" class="btn btn-primary btn-lg" onclick="generateReport()">
+                                    <i class="fas fa-file-pdf"></i>
+                                    Generar Reporte
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Reportes Generados -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-history"></i>
+                            Reportes Disponibles
+                        </h3>
+                        <button class="btn btn-outline btn-sm" onclick="loadAvailableReports()">
+                            <i class="fas fa-sync-alt"></i>
+                            Actualizar
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                            <!-- Reporte de Ventas -->
+                            <div class="card" style="margin: 0; border-left: 4px solid var(--success-color);">
+                                <div class="card-header" style="padding: 1rem; border-bottom: 1px solid var(--bg-secondary);">
+                                    <h4 style="font-size: 1rem; margin: 0;">
+                                        <i class="fas fa-chart-line"></i>
+                                        Reporte de Ventas
+                                    </h4>
+                                </div>
+                                <div class="card-body" style="padding: 1rem;">
+                                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                                        Análisis completo de transacciones y ventas por país.
+                                    </p>
+                                    <button class="btn btn-success btn-sm" onclick="quickReport('ventas')">
+                                        <i class="fas fa-download"></i>
+                                        Generar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Reporte de Inventario -->
+                            <div class="card" style="margin: 0; border-left: 4px solid var(--warning-color);">
+                                <div class="card-header" style="padding: 1rem; border-bottom: 1px solid var(--bg-secondary);">
+                                    <h4 style="font-size: 1rem; margin: 0;">
+                                        <i class="fas fa-warehouse"></i>
+                                        Reporte de Inventario
+                                    </h4>
+                                </div>
+                                <div class="card-body" style="padding: 1rem;">
+                                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                                        Estado de stocks y alertas de inventario por ubicación.
+                                    </p>
+                                    <button class="btn btn-warning btn-sm" onclick="quickReport('inventario')">
+                                        <i class="fas fa-download"></i>
+                                        Generar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Reporte Consolidado -->
+                            <div class="card" style="margin: 0; border-left: 4px solid var(--info-color);">
+                                <div class="card-header" style="padding: 1rem; border-bottom: 1px solid var(--bg-secondary);">
+                                    <h4 style="font-size: 1rem; margin: 0;">
+                                        <i class="fas fa-globe"></i>
+                                        Reporte Consolidado
+                                    </h4>
+                                </div>
+                                <div class="card-body" style="padding: 1rem;">
+                                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                                        Vista integral de todas las operaciones globales.
+                                    </p>
+                                    <button class="btn btn-primary btn-sm" onclick="quickReport('consolidado')">
+                                        <i class="fas fa-download"></i>
+                                        Generar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Reporte Seguro -->
+                            <div class="card" style="margin: 0; border-left: 4px solid var(--danger-color);">
+                                <div class="card-header" style="padding: 1rem; border-bottom: 1px solid var(--bg-secondary);">
+                                    <h4 style="font-size: 1rem; margin: 0;">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Reporte Seguro
+                                    </h4>
+                                </div>
+                                <div class="card-body" style="padding: 1rem;">
+                                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                                        Reporte con firma digital, marca de agua y encriptación.
+                                    </p>
+                                    <button class="btn btn-danger btn-sm" onclick="quickReport('seguro')">
+                                        <i class="fas fa-download"></i>
+                                        Generar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultado del Reporte -->
+                <div class="card" id="reportResultCard" style="display: none;">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-file-contract"></i>
+                            Resultado del Reporte
+                        </h3>
+                        <button class="btn btn-outline btn-sm" onclick="closeReportResult()">
+                            <i class="fas fa-times"></i>
+                            Cerrar
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="reportResult" style="white-space: pre-wrap; font-family: monospace; font-size: 0.875rem; background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-md); max-height: 500px; overflow-y: auto;">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>&copy; 2024 FinanCorp - Sistema de Reportes Financieros (SERF) | Todos los derechos reservados</p>
+            </footer>
+        </main>
+    </div>
+
+    <script src="/js/reportes.js"></script>
+</body>
+</html>

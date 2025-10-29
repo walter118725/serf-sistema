@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERF - Sistema de Reportes Financieros | FinanCorp</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>SERF</h1>
+                <p class="company-name">FinanCorp</p>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="/index.html" class="nav-link active">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/productos.html" class="nav-link">
+                            <i class="fas fa-box"></i>
+                            <span>Productos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/ventas.html" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Ventas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/inventario.html" class="nav-link">
+                            <i class="fas fa-warehouse"></i>
+                            <span>Inventario</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/reportes.html" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reportes</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <h2 class="page-title">Dashboard</h2>
+                <div class="user-info">
+                    <select class="country-selector" id="countrySelector">
+                        <option value="ALL">Todos los Países</option>
+                        <option value="PERU">Perú</option>
+                        <option value="MEXICO">México</option>
+                        <option value="ESPAÑA">España</option>
+                    </select>
+                    <div class="user-avatar">FC</div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <section class="content">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card products">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Productos</span>
+                            <i class="fas fa-box stat-card-icon"></i>
+                        </div>
+                        <div class="stat-card-value" id="totalProductos">-</div>
+                        <p class="stat-card-description">Total en catálogo</p>
+                    </div>
+
+                    <div class="stat-card sales">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Ventas</span>
+                            <i class="fas fa-shopping-cart stat-card-icon"></i>
+                        </div>
+                        <div class="stat-card-value" id="totalVentas">-</div>
+                        <p class="stat-card-description">Transacciones registradas</p>
+                    </div>
+
+                    <div class="stat-card inventory">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Inventario</span>
+                            <i class="fas fa-warehouse stat-card-icon"></i>
+                        </div>
+                        <div class="stat-card-value" id="totalInventario">-</div>
+                        <p class="stat-card-description">Items en almacenes</p>
+                    </div>
+
+                    <div class="stat-card alerts">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Alertas</span>
+                            <i class="fas fa-exclamation-triangle stat-card-icon"></i>
+                        </div>
+                        <div class="stat-card-value" id="totalAlertas">-</div>
+                        <p class="stat-card-description">Stock bajo</p>
+                    </div>
+                </div>
+
+                <!-- Alertas de Stock Bajo -->
+                <div class="card" id="alertasCard">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Alertas de Stock Bajo
+                        </h3>
+                        <a href="/inventario.html" class="btn btn-outline btn-sm">
+                            Ver Inventario
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div id="alertasContent">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ventas Recientes -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-line"></i>
+                            Ventas Recientes
+                        </h3>
+                        <a href="/ventas.html" class="btn btn-outline btn-sm">
+                            Ver Todas
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div id="ventasContent">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Productos Destacados -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-star"></i>
+                            Productos en Catálogo
+                        </h3>
+                        <a href="/productos.html" class="btn btn-outline btn-sm">
+                            Ver Todos
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div id="productosContent">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>&copy; 2024 FinanCorp - Sistema de Reportes Financieros (SERF) | Todos los derechos reservados</p>
+            </footer>
+        </main>
+    </div>
+
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>
