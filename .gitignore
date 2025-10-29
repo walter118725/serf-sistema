@@ -1,0 +1,24 @@
+# Maven/Java
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/
+
+# Logs
+*.log
+
+# IDEs
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# VS Code (keep tracked files as-is; ignore new ones)
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Other
+.springBeans
