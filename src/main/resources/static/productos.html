@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - SERF | FinanCorp</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>SERF</h1>
+                <p class="company-name">FinanCorp</p>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="/index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/productos.html" class="nav-link active">
+                            <i class="fas fa-box"></i>
+                            <span>Productos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/ventas.html" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Ventas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/inventario.html" class="nav-link">
+                            <i class="fas fa-warehouse"></i>
+                            <span>Inventario</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/reportes.html" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reportes</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <h2 class="page-title">Gestión de Productos</h2>
+                <div class="user-info">
+                    <button class="btn btn-primary" onclick="openAddProductModal()">
+                        <i class="fas fa-plus"></i>
+                        Nuevo Producto
+                    </button>
+                    <div class="user-avatar">FC</div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <section class="content">
+                <!-- Filtros y Búsqueda -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="search-bar">
+                            <input
+                                type="text"
+                                class="search-input"
+                                id="searchInput"
+                                placeholder="Buscar productos por nombre..."
+                            >
+                            <select class="form-select" id="categoryFilter" style="max-width: 200px;">
+                                <option value="">Todas las Categorías</option>
+                                <option value="LAPTOPS">Laptops</option>
+                                <option value="SMARTPHONES">Smartphones</option>
+                                <option value="REDES">Redes</option>
+                                <option value="ACCESORIOS">Accesorios</option>
+                            </select>
+                            <select class="form-select" id="countryFilter" style="max-width: 200px;">
+                                <option value="">Todos los Países</option>
+                                <option value="CHINA">China</option>
+                                <option value="COREA DEL SUR">Corea del Sur</option>
+                                <option value="ESTADOS UNIDOS">Estados Unidos</option>
+                                <option value="TAIWAN">Taiwan</option>
+                            </select>
+                            <button class="btn btn-secondary" onclick="clearFilters()">
+                                <i class="fas fa-times"></i>
+                                Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Productos -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-list"></i>
+                            Catálogo de Productos
+                        </h3>
+                        <span class="badge badge-info" id="productCount">0 productos</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="productosContent">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>&copy; 2024 FinanCorp - Sistema de Reportes Financieros (SERF) | Todos los derechos reservados</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Modal para Agregar/Editar Producto -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Nuevo Producto</h3>
+                <button class="modal-close" onclick="closeProductModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nombre del Producto</label>
+                            <input type="text" class="form-input" id="productName" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Categoría</label>
+                            <select class="form-select" id="productCategory" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="LAPTOPS">Laptops</option>
+                                <option value="SMARTPHONES">Smartphones</option>
+                                <option value="REDES">Redes</option>
+                                <option value="ACCESORIOS">Accesorios</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Precio (USD)</label>
+                            <input type="number" class="form-input" id="productPrice" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Fabricante</label>
+                            <input type="text" class="form-input" id="productManufacturer" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">País de Origen</label>
+                        <input type="text" class="form-input" id="productCountry" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-textarea" id="productDescription" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Fecha de Importación</label>
+                        <input type="date" class="form-input" id="productImportDate" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeProductModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveProduct()">
+                    <i class="fas fa-save"></i>
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/productos.js"></script>
+</body>
+</html>
