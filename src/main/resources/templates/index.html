@@ -258,6 +258,7 @@
     </main>
 
     <!-- Modals -->
+    <!-- Modal Producto -->
     <div id="product-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -311,8 +312,12 @@
                         <div class="form-group">
                             <label for="monedaOrigen">Moneda Origen</label>
                             <select id="monedaOrigen" name="monedaOrigen" required>
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
+                                <option value="CNY">CNY (Yuan)</option>
+                                <option value="USD">USD (Dólar)</option>
+                                <option value="EUR">EUR (Euro)</option>
+                                <option value="PEN">PEN (Sol)</option>
+                                <option value="MXN">MXN (Peso Mexicano)</option>
+                                <option value="COP">COP (Peso Colombiano)</option>
                             </select>
                         </div>
                     </div>
@@ -325,6 +330,97 @@
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('product-modal')">Cancelar</button>
                 <button class="btn btn-primary" onclick="saveProduct()">Guardar Producto</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nueva Venta -->
+    <div id="sale-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nueva Venta</h3>
+                <span class="close" onclick="closeModal('sale-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="sale-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="numeroFactura">Número de Factura</label>
+                            <input type="text" id="numeroFactura" name="numeroFactura" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fechaVenta">Fecha de Venta</label>
+                            <input type="datetime-local" id="fechaVenta" name="fechaVenta" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productoId">Producto</label>
+                            <select id="productoId" name="productoId" onchange="onProductSelectionChange()" required>
+                                <option value="">Seleccionar producto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cantidad">Cantidad</label>
+                            <input type="number" id="cantidad" name="cantidad" min="1" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="precioUnitario">Precio Unitario</label>
+                            <input type="number" id="precioUnitario" name="precioUnitario" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="monedaLocal">Moneda</label>
+                            <select id="monedaLocal" name="monedaLocal" required>
+                                <option value="CNY">CNY (Yuan)</option>
+                                <option value="USD">USD (Dólar)</option>
+                                <option value="EUR">EUR (Euro)</option>
+                                <option value="PEN">PEN (Sol Peruano)</option>
+                                <option value="MXN">MXN (Peso Mexicano)</option>
+                                <option value="COP">COP (Peso Colombiano)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente">Cliente</label>
+                            <input type="text" id="cliente" name="cliente">
+                        </div>
+                        <div class="form-group">
+                            <label for="vendedorResponsable">Vendedor Responsable</label>
+                            <input type="text" id="vendedorResponsable" name="vendedorResponsable">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="paisFilial">País/Filial</label>
+                            <select id="paisFilial" name="paisFilial" required>
+                                <option value="">Seleccionar país</option>
+                                <option value="PERÚ">Perú</option>
+                                <option value="MÉXICO">México</option>
+                                <option value="COLOMBIA">Colombia</option>
+                                <option value="CHINA">China</option>
+                                <option value="ARGENTINA">Argentina</option>
+                                <option value="CHILE">Chile</option>
+                                <option value="BRASIL">Brasil</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="metodoPago">Método de Pago</label>
+                            <select id="metodoPago" name="metodoPago" required>
+                                <option value="">Seleccionar método</option>
+                                <option value="EFECTIVO">Efectivo</option>
+                                <option value="TARJETA">Tarjeta</option>
+                                <option value="TRANSFERENCIA">Transferencia</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('sale-modal')">Cancelar</button>
+                <button class="btn btn-success" onclick="saveSale()">Registrar Venta</button>
             </div>
         </div>
     </div>

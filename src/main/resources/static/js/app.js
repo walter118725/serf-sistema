@@ -472,8 +472,41 @@ function showAddProductModal() {
     showModal('product-modal');
 }
 
-function showAddSaleModal() {
-    showToast('Función de nueva venta en desarrollo', 'info');
+async function showAddSaleModal() {
+    try {
+        // Cargar productos disponibles para el select
+        const productos = await fetchAPI('/productos');
+        const select = document.getElementById('productoId');
+        
+        // Limpiar opciones existentes (excepto la primera)
+        select.innerHTML = '<option value="">Seleccionar producto</option>';
+        
+        // Agregar productos disponibles
+        productos.forEach(producto => {
+            if (producto.stockActual > 0) {
+                const option = document.createElement('option');
+                option.value = producto.id;
+                option.textContent = `${producto.codigo} - ${producto.nombre} (Stock: ${producto.stockActual})`;
+                option.dataset.precio = producto.precioVentaSugerido;
+                select.appendChild(option);
+            }
+        });
+        
+        // Establecer fecha actual por defecto
+        const now = new Date();
+        const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        document.getElementById('fechaVenta').value = localDateTime;
+        
+        // Generar número de factura automático
+        const numeroFactura = generateInvoiceNumber();
+        document.getElementById('numeroFactura').value = numeroFactura;
+        
+        showModal('sale-modal');
+        
+    } catch (error) {
+        console.error('Error cargando productos:', error);
+        showToast('Error cargando productos para la venta', 'error');
+    }
 }
 
 function showModal(modalId) {
@@ -501,6 +534,7 @@ function closeAllModals() {
 async function saveProduct() {
     const form = document.getElementById('product-form');
     const formData = new FormData(form);
+    const editingId = form.dataset.editingId;
     
     const producto = {
         codigo: formData.get('codigo'),
@@ -508,29 +542,119 @@ async function saveProduct() {
         categoria: formData.get('categoria'),
         proveedor: formData.get('proveedor'),
         stockInicial: parseInt(formData.get('stockInicial')),
-        stockActual: parseInt(formData.get('stockInicial')), // Inicialmente igual al stock inicial
         costoImportacion: parseFloat(formData.get('costoImportacion')),
         precioVentaSugerido: parseFloat(formData.get('precioVentaSugerido')),
         monedaOrigen: formData.get('monedaOrigen'),
-        descripcionTecnica: formData.get('descripcionTecnica'),
-        fechaImportacion: new Date().toISOString().split('T')[0]
+        descripcionTecnica: formData.get('descripcionTecnica')
     };
+    
+    // Si no estamos editando, agregar campos adicionales
+    if (!editingId) {
+        producto.stockActual = producto.stockInicial;
+        producto.fechaImportacion = new Date().toISOString().split('T')[0];
+    }
     
     try {
         showLoading(true);
-        await fetchAPI('/productos', 'POST', producto);
+        
+        if (editingId) {
+            // Actualizar producto existente
+            await fetchAPI(`/productos/${editingId}`, 'PUT', producto);
+            showToast('Producto actualizado exitosamente', 'success');
+        } else {
+            // Crear nuevo producto
+            await fetchAPI('/productos', 'POST', producto);
+            showToast('Producto creado exitosamente', 'success');
+        }
+        
         closeModal('product-modal');
-        showToast('Producto creado exitosamente', 'success');
+        
+        // Limpiar el formulario y resetear el estado de edición
+        form.reset();
+        delete form.dataset.editingId;
+        
+        // Resetear el modal a su estado original
+        document.querySelector('#product-modal .modal-header h3').textContent = '📦 Nuevo Producto';
+        document.querySelector('#product-modal .btn-primary').textContent = '💾 Guardar Producto';
         
         if (currentSection === 'productos') {
             loadProductos();
         }
+        updateStats();
         
     } catch (error) {
         console.error('Error guardando producto:', error);
         showToast('Error guardando el producto', 'error');
     } finally {
         showLoading(false);
+    }
+}
+
+async function saveSale() {
+    try {
+        const form = document.getElementById('sale-form');
+        const formData = new FormData(form);
+        
+        // Validar campos requeridos
+        if (!formData.get('numeroFactura') || !formData.get('fechaVenta') || !formData.get('productoId') || !formData.get('cantidad') || !formData.get('precioUnitario')) {
+            showToast('Por favor, complete todos los campos requeridos', 'error');
+            return;
+        }
+        
+        const venta = {
+            numeroFactura: formData.get('numeroFactura'),
+            fechaVenta: formData.get('fechaVenta'),
+            productoId: parseInt(formData.get('productoId')),
+            cantidad: parseInt(formData.get('cantidad')),
+            precioUnitario: parseFloat(formData.get('precioUnitario')),
+            monedaLocal: formData.get('monedaLocal'),
+            cliente: formData.get('cliente'),
+            vendedorResponsable: formData.get('vendedorResponsable'),
+            paisFilial: formData.get('paisFilial'),
+            metodoPago: formData.get('metodoPago')
+        };
+        
+        showLoading(true);
+        await fetchAPI('/ventas', 'POST', venta);
+        closeModal('sale-modal');
+        showToast('Venta registrada exitosamente', 'success');
+        
+        if (currentSection === 'ventas') {
+            loadVentas();
+        }
+        updateStats();
+        
+    } catch (error) {
+        console.error('Error registrando venta:', error);
+        showToast('Error al registrar venta', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ===== HELPERS PARA MODALES =====
+function generateInvoiceNumber() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `FAC-${year}${month}${day}${hours}${minutes}`;
+}
+
+function onProductSelectionChange() {
+    const select = document.getElementById('productoId');
+    const precioInput = document.getElementById('precioUnitario');
+    
+    if (select.selectedIndex > 0) {
+        const selectedOption = select.options[select.selectedIndex];
+        const precioSugerido = selectedOption.dataset.precio;
+        if (precioSugerido) {
+            precioInput.value = precioSugerido;
+        }
+    } else {
+        precioInput.value = '';
     }
 }
 
@@ -617,22 +741,206 @@ function debounce(func, wait) {
     };
 }
 
-function exportReporte(title) {
-    showToast('Función de exportación en desarrollo', 'info');
+async function exportReporte(title) {
+    try {
+        let data = [];
+        let filename = 'reporte_serf';
+        
+        if (currentSection === 'productos') {
+            data = await fetchAPI('/productos');
+            filename = 'productos_serf';
+        } else if (currentSection === 'ventas') {
+            data = await fetchAPI('/ventas');
+            filename = 'ventas_serf';
+        } else if (currentSection === 'reportes') {
+            data = await fetchAPI('/reportes');
+            filename = 'reportes_serf';
+        } else {
+            // Exportar dashboard con estadísticas
+            const stats = await fetchAPI('/ventas/estadisticas');
+            data = [stats];
+            filename = 'dashboard_serf';
+        }
+        
+        if (data.length === 0) {
+            showToast('No hay datos para exportar', 'warning');
+            return;
+        }
+        
+        // Convertir a CSV
+        const csv = convertToCSV(data);
+        downloadCSV(csv, `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+        showToast('Reporte exportado exitosamente', 'success');
+        
+    } catch (error) {
+        console.error('Error exportando reporte:', error);
+        showToast('Error al exportar reporte', 'error');
+    }
 }
 
 function printReporte() {
-    showToast('Función de impresión en desarrollo', 'info');
+    try {
+        // Crear ventana de impresión con el contenido actual
+        const printWindow = window.open('', '_blank');
+        const currentDate = new Date().toLocaleDateString('es-PE');
+        
+        let printContent = `
+            <html>
+            <head>
+                <title>Reporte SERF - ${currentDate}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1 { color: #2c3e50; text-align: center; }
+                    .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+                    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px; }
+                    .stat-card { padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+                    .stat-card h3 { margin: 0; color: #2c3e50; }
+                    .stat-card p { margin: 5px 0; font-size: 18px; font-weight: bold; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #3498db; color: white; }
+                    .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>Sistema Empresarial de Gestión de Reportes Financieros (SERF)</h1>
+                    <p><strong>FinanCorp S.A.</strong></p>
+                    <p>Fecha: ${currentDate}</p>
+                </div>
+        `;
+        
+        // Agregar contenido según la sección actual
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            printContent += mainContent.outerHTML;
+        }
+        
+        printContent += `
+                <div class="footer">
+                    <p>Generado por SERF - Sistema Empresarial de Gestión de Reportes Financieros</p>
+                    <p>© ${new Date().getFullYear()} FinanCorp S.A. - Todos los derechos reservados</p>
+                </div>
+            </body>
+            </html>
+        `;
+        
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        
+        // Esperar a que cargue y luego imprimir
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 500);
+        
+        showToast('Reporte enviado a impresión', 'success');
+        
+    } catch (error) {
+        console.error('Error imprimiendo reporte:', error);
+        showToast('Error al imprimir reporte', 'error');
+    }
 }
 
-function editProduct(id) {
-    showToast(`Editar producto ID: ${id} - Función en desarrollo`, 'info');
+async function editProduct(id) {
+    try {
+        showLoading(true);
+        const producto = await fetchAPI(`/productos/${id}`);
+        
+        if (!producto) {
+            showToast('Producto no encontrado', 'error');
+            return;
+        }
+        
+        // Llenar el formulario con los datos del producto
+        document.getElementById('codigo').value = producto.codigo;
+        document.getElementById('nombre').value = producto.nombre;
+        document.getElementById('categoria').value = producto.categoria;
+        document.getElementById('proveedor').value = producto.proveedor || '';
+        document.getElementById('stockInicial').value = producto.stockInicial;
+        document.getElementById('costoImportacion').value = producto.costoImportacion;
+        document.getElementById('precioVentaSugerido').value = producto.precioVentaSugerido;
+        document.getElementById('monedaOrigen').value = producto.monedaOrigen;
+        document.getElementById('descripcionTecnica').value = producto.descripcionTecnica || '';
+        
+        // Cambiar el título del modal
+        document.querySelector('#product-modal .modal-header h3').textContent = '✏️ Editar Producto';
+        
+        // Cambiar el botón de guardar
+        const saveButton = document.querySelector('#product-modal .btn-primary');
+        saveButton.textContent = '💾 Actualizar Producto';
+        
+        // Guardar el ID para la actualización
+        document.getElementById('product-form').dataset.editingId = id;
+        
+        showModal('product-modal');
+        
+    } catch (error) {
+        console.error('Error cargando producto:', error);
+        showToast('Error cargando datos del producto', 'error');
+    } finally {
+        showLoading(false);
+    }
 }
 
-function deleteProduct(id) {
-    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-        // Implementar eliminación
-        showToast(`Eliminar producto ID: ${id} - Función en desarrollo`, 'info');
+async function deleteProduct(id) {
+    if (confirm('¿Está seguro de que desea eliminar este producto? Esta acción no se puede deshacer.')) {
+        try {
+            showLoading(true);
+            await fetchAPI(`/productos/${id}`, 'DELETE');
+            showToast('Producto eliminado exitosamente', 'success');
+            
+            if (currentSection === 'productos') {
+                loadProductos();
+            }
+            updateStats();
+            
+        } catch (error) {
+            console.error('Error eliminando producto:', error);
+            showToast('Error al eliminar producto', 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+}
+
+// ===== FUNCIONES AUXILIARES PARA EXPORTACIÓN =====
+function convertToCSV(data) {
+    if (!data || data.length === 0) return '';
+    
+    const headers = Object.keys(data[0]);
+    const csvContent = [
+        headers.join(','),
+        ...data.map(row => 
+            headers.map(header => {
+                const value = row[header];
+                // Escapar comillas y envolver en comillas si contiene comas
+                const stringValue = String(value || '');
+                return stringValue.includes(',') ? `"${stringValue.replace(/"/g, '""')}"` : stringValue;
+            }).join(',')
+        )
+    ].join('\n');
+    
+    return csvContent;
+}
+
+function downloadCSV(csvContent, filename) {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (navigator.msSaveBlob) {
+        // IE 10+
+        navigator.msSaveBlob(blob, filename);
+    } else {
+        // Otros navegadores
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = filename;
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
 }
 

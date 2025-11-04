@@ -49,4 +49,39 @@ public class VentaService {
     public List<Venta> listarTodas() {
         return ventaRepository.findAll();
     }
+    
+    public java.util.Map<String, Object> obtenerEstadisticasGenerales() {
+        List<Venta> todasLasVentas = ventaRepository.findAll();
+        List<com.financorp.serf.model.Producto> todosLosProductos = productoService.listarTodos();
+        
+        // Calcular estadísticas
+        long totalVentas = todasLasVentas.size();
+        long totalProductos = todosLosProductos.size();
+        
+        BigDecimal ingresosTotales = todasLasVentas.stream()
+            .map(Venta::getTotalVentaEUR)
+            .filter(java.util.Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        long productosActivos = todosLosProductos.stream()
+            .mapToInt(com.financorp.serf.model.Producto::getStockActual)
+            .sum();
+        
+        // Crear el mapa de estadísticas
+        java.util.Map<String, Object> estadisticas = new java.util.HashMap<>();
+        estadisticas.put("totalVentas", totalVentas);
+        estadisticas.put("totalProductos", totalProductos);
+        estadisticas.put("ingresosTotales", ingresosTotales);
+        estadisticas.put("productosActivos", productosActivos);
+        estadisticas.put("ventasDelMes", obtenerVentasDelMes());
+        estadisticas.put("productosLowStock", productoService.obtenerProductosBajoStock(10).size());
+        
+        return estadisticas;
+    }
+    
+    private long obtenerVentasDelMes() {
+        LocalDateTime inicioMes = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime finMes = inicioMes.plusMonths(1).minusSeconds(1);
+        return ventaRepository.findByFechaVentaBetween(inicioMes, finMes).size();
+    }
 }

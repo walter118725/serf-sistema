@@ -74,4 +74,63 @@ public class ProductoService {
         return productoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
     }
+    
+    @Transactional
+    public Producto actualizarProducto(Long id, Producto producto) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser null");
+        }
+        
+        Producto productoExistente = productoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
+        
+        // Actualizar los campos permitidos
+        productoExistente.setCodigo(producto.getCodigo());
+        productoExistente.setNombre(producto.getNombre());
+        productoExistente.setCategoria(producto.getCategoria());
+        productoExistente.setProveedor(producto.getProveedor());
+        productoExistente.setCostoImportacion(producto.getCostoImportacion());
+        productoExistente.setPrecioVentaSugerido(producto.getPrecioVentaSugerido());
+        productoExistente.setMonedaOrigen(producto.getMonedaOrigen());
+        productoExistente.setDescripcionTecnica(producto.getDescripcionTecnica());
+        
+        // Actualizar stock inicial si es diferente (mantener stock actual si no se especifica)
+        if (producto.getStockInicial() != null) {
+            // Si el stock inicial cambió, ajustar el stock actual proporcionalmente
+            int diferencia = producto.getStockInicial() - productoExistente.getStockInicial();
+            productoExistente.setStockInicial(producto.getStockInicial());
+            productoExistente.setStockActual(Math.max(0, productoExistente.getStockActual() + diferencia));
+        }
+        
+        // Convertir y actualizar precio sugerido si cambió la moneda origen
+        if (producto.getMonedaOrigen() != null && !producto.getMonedaOrigen().equals(productoExistente.getMonedaOrigen())) {
+            BigDecimal costoEnEUR = configuracion.convertirAMonedaCorporativa(
+                productoExistente.getCostoImportacion(),
+                productoExistente.getMonedaOrigen()
+            );
+            // Opcionalmente actualizar el precio sugerido basado en el nuevo costo
+            if (productoExistente.getPrecioVentaSugerido().equals(BigDecimal.ZERO)) {
+                productoExistente.setPrecioVentaSugerido(costoEnEUR.multiply(new BigDecimal("1.3")));
+            }
+        }
+        
+        return productoRepository.save(productoExistente);
+    }
+    
+    @Transactional
+    public void eliminarProducto(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser null");
+        }
+        
+        // Verificar que el producto existe antes de eliminarlo
+        if (!productoRepository.existsById(id)) {
+            throw new RuntimeException("Producto no encontrado con ID: " + id);
+        }
+        
+        // Verificar si el producto tiene ventas asociadas
+        // Si tiene ventas, no debería eliminarse (opcional: agregar esta validación)
+        
+        productoRepository.deleteById(id);
+    }
 }
