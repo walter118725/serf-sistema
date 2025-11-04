@@ -1,15 +1,17 @@
 package com.financorp.serf.service;
 
-import com.financorp.serf.config.ConfiguracionGlobal;
-import com.financorp.serf.model.Producto;
-import com.financorp.serf.model.Venta;
-import com.financorp.serf.repository.VentaRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.financorp.serf.config.ConfiguracionGlobal;
+import com.financorp.serf.model.Venta;
+import com.financorp.serf.repository.VentaRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

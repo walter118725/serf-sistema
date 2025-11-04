@@ -1,13 +1,16 @@
 package com.financorp.serf.service;
 
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.financorp.serf.config.ConfiguracionGlobal;
 import com.financorp.serf.model.Producto;
 import com.financorp.serf.repository.ProductoRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,11 +21,16 @@ public class ProductoService {
     
     @Transactional
     public Producto registrarProducto(Producto producto) {
-        // Convertir costo de importación a EUR
+        // Convertir y almacenar el costo en EUR (moneda corporativa)
         BigDecimal costoEnEUR = configuracion.convertirAMonedaCorporativa(
             producto.getCostoImportacion(),
             producto.getMonedaOrigen()
         );
+        
+        // Establecer el precio sugerido basado en el costo convertido
+        if (producto.getPrecioVentaSugerido() == null) {
+            producto.setPrecioVentaSugerido(costoEnEUR.multiply(new BigDecimal("1.3"))); // Margen del 30%
+        }
         
         producto.setStockActual(producto.getStockInicial());
         
@@ -40,6 +48,9 @@ public class ProductoService {
     
     @Transactional
     public void actualizarStock(Long productoId, Integer cantidad) {
+        if (productoId == null) {
+            throw new IllegalArgumentException("El ID del producto no puede ser null");
+        }
         Producto producto = productoRepository.findById(productoId)
             .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
         
@@ -54,5 +65,13 @@ public class ProductoService {
     
     public List<Producto> obtenerProductosBajoStock(Integer limiteStock) {
         return productoRepository.findByStockActualLessThan(limiteStock);
+    }
+    
+    public Producto obtenerPorId(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser null");
+        }
+        return productoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
     }
 }

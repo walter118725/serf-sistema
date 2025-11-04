@@ -1,9 +1,10 @@
 package com.financorp.serf.config;
 
-import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.stereotype.Component;
 
 @Component
 public class ConfiguracionGlobal {
@@ -19,8 +20,8 @@ public class ConfiguracionGlobal {
     
     // Configuración de reportes
     private String formatoFechaReportes = "dd/MM/yyyy";
-    private String logoEmpresa = "FinanCorp S.A.";
-    private String firmaDigitalAutorizada = "Gerencia General";
+    private final String logoEmpresa = "FinanCorp S.A.";
+    private final String firmaDigitalAutorizada = "Gerencia General";
     
     // Constructor privado para Singleton
     private ConfiguracionGlobal() {

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERF Sistema - Dashboard Empresarial</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-chart-line"></i>
+                <span>SERF Sistema</span>
+            </div>
+            <nav class="navbar-menu">
+                <a href="#dashboard" class="nav-link active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="#productos" class="nav-link">
+                    <i class="fas fa-box"></i>
+                    Productos
+                </a>
+                <a href="#ventas" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    Ventas
+                </a>
+                <a href="#reportes" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    Reportes
+                </a>
+            </nav>
+            <div class="navbar-actions">
+                <button class="btn-notification">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="user-menu">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Admin</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section active">
+            <div class="section-header">
+                <h1>Dashboard Empresarial</h1>
+                <p>Panel de control y métricas del Sistema SERF</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="total-productos">0</h3>
+                        <p>Total Productos</p>
+                        <span class="stat-change positive">+12% vs mes anterior</span>
+                    </div>
+                </div>
+
+                <div class="stat-card success">
+                    <div class="stat-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="total-ventas">0</h3>
+                        <p>Ventas del Mes</p>
+                        <span class="stat-change positive">+8% vs mes anterior</span>
+                    </div>
+                </div>
+
+                <div class="stat-card warning">
+                    <div class="stat-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="ingresos-totales">€0</h3>
+                        <p>Ingresos Totales</p>
+                        <span class="stat-change positive">+15% vs mes anterior</span>
+                    </div>
+                </div>
+
+                <div class="stat-card danger">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="stock-bajo">0</h3>
+                        <p>Productos Stock Bajo</p>
+                        <span class="stat-change negative">Requiere atención</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Recent Activity -->
+            <div class="dashboard-grid">
+                <div class="chart-container">
+                    <h3>Ventas por Mes</h3>
+                    <div class="chart-placeholder">
+                        <canvas id="ventasChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <h3>Actividad Reciente</h3>
+                    <div class="activity-list" id="recent-activity">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Productos Section -->
+        <section id="productos" class="content-section">
+            <div class="section-header">
+                <h1>Gestión de Productos</h1>
+                <button class="btn btn-primary" onclick="showAddProductModal()">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Producto
+                </button>
+            </div>
+
+            <div class="filters-bar">
+                <input type="text" id="search-productos" placeholder="Buscar productos..." class="search-input">
+                <select id="filter-categoria" class="filter-select">
+                    <option value="">Todas las categorías</option>
+                    <option value="SMARTPHONE">Smartphones</option>
+                    <option value="LAPTOP">Laptops</option>
+                    <option value="EQUIPO_RED">Equipos de Red</option>
+                    <option value="ACCESORIO">Accesorios</option>
+                    <option value="OTRO">Otros</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="productos-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Stock</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productos-tbody">
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Ventas Section -->
+        <section id="ventas" class="content-section">
+            <div class="section-header">
+                <h1>Gestión de Ventas</h1>
+                <button class="btn btn-success" onclick="showAddSaleModal()">
+                    <i class="fas fa-plus"></i>
+                    Nueva Venta
+                </button>
+            </div>
+
+            <div class="filters-bar">
+                <input type="date" id="fecha-inicio" class="filter-input">
+                <input type="date" id="fecha-fin" class="filter-input">
+                <input type="text" id="search-ventas" placeholder="Buscar por cliente..." class="search-input">
+                <button class="btn btn-outline" onclick="filtrarVentas()">
+                    <i class="fas fa-filter"></i>
+                    Filtrar
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="ventas-table">
+                    <thead>
+                        <tr>
+                            <th>Factura</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Total (EUR)</th>
+                            <th>País</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ventas-tbody">
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Reportes Section -->
+        <section id="reportes" class="content-section">
+            <div class="section-header">
+                <h1>Reportes y Análisis</h1>
+                <div class="report-actions">
+                    <button class="btn btn-info" onclick="generarReporte('mensual')">
+                        <i class="fas fa-calendar-alt"></i>
+                        Reporte Mensual
+                    </button>
+                    <button class="btn btn-info" onclick="generarReporte('trimestral')">
+                        <i class="fas fa-calendar"></i>
+                        Reporte Trimestral
+                    </button>
+                    <button class="btn btn-info" onclick="generarReporte('anual')">
+                        <i class="fas fa-calendar-year"></i>
+                        Reporte Anual
+                    </button>
+                </div>
+            </div>
+
+            <div class="reports-grid">
+                <div class="report-card">
+                    <h3>Reporte de Inventarios</h3>
+                    <p>Stock actual y productos con stock bajo</p>
+                    <button class="btn btn-outline" onclick="generarReporte('stock')">
+                        <i class="fas fa-download"></i>
+                        Generar
+                    </button>
+                </div>
+
+                <div class="report-card">
+                    <h3>Análisis de Ventas</h3>
+                    <p>Tendencias y patrones de ventas por período</p>
+                    <button class="btn btn-outline" onclick="generarReporte('ventas')">
+                        <i class="fas fa-chart-line"></i>
+                        Ver Análisis
+                    </button>
+                </div>
+
+                <div class="report-card">
+                    <h3>Productos Más Vendidos</h3>
+                    <p>Ranking de productos por volumen de ventas</p>
+                    <button class="btn btn-outline" onclick="generarReporte('top-productos')">
+                        <i class="fas fa-trophy"></i>
+                        Ver Ranking
+                    </button>
+                </div>
+            </div>
+
+            <div class="report-results" id="report-results">
+                <!-- Los resultados de reportes se mostrarán aquí -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nuevo Producto</h3>
+                <span class="close" onclick="closeModal('product-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="product-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="codigo">Código del Producto</label>
+                            <input type="text" id="codigo" name="codigo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre">Nombre</label>
+                            <input type="text" id="nombre" name="nombre" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoria">Categoría</label>
+                            <select id="categoria" name="categoria" required>
+                                <option value="">Seleccionar categoría</option>
+                                <option value="SMARTPHONE">Smartphone</option>
+                                <option value="LAPTOP">Laptop</option>
+                                <option value="EQUIPO_RED">Equipo de Red</option>
+                                <option value="ACCESORIO">Accesorio</option>
+                                <option value="OTRO">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="proveedor">Proveedor</label>
+                            <input type="text" id="proveedor" name="proveedor">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="stockInicial">Stock Inicial</label>
+                            <input type="number" id="stockInicial" name="stockInicial" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="costoImportacion">Costo Importación</label>
+                            <input type="number" id="costoImportacion" name="costoImportacion" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="precioVentaSugerido">Precio Venta Sugerido</label>
+                            <input type="number" id="precioVentaSugerido" name="precioVentaSugerido" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="monedaOrigen">Moneda Origen</label>
+                            <select id="monedaOrigen" name="monedaOrigen" required>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="descripcionTecnica">Descripción Técnica</label>
+                        <textarea id="descripcionTecnica" name="descripcionTecnica" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('product-modal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveProduct()">Guardar Producto</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
