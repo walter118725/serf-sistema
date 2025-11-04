@@ -8,15 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.financorp.serf.model.Usuario;
-import com.financorp.serf.service.UsuarioService;
-
-import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequiredArgsConstructor
 public class AuthController {
-    
-    private final UsuarioService usuarioService;
     
     /**
      * Página de login
@@ -49,7 +43,7 @@ public class AuthController {
      */
     @GetMapping("/")
     public String dashboard(Model model, Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof Usuario) {
             Usuario usuario = (Usuario) authentication.getPrincipal();
             model.addAttribute("usuario", usuario);
         }
@@ -61,7 +55,7 @@ public class AuthController {
      */
     @GetMapping("/perfil")
     public String perfil(Model model, Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof Usuario) {
             Usuario usuario = (Usuario) authentication.getPrincipal();
             model.addAttribute("usuario", usuario);
         }

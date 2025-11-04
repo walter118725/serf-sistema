@@ -39,6 +39,7 @@ public class UsuarioService implements UserDetailsService {
      * Crear usuario por defecto si no existe
      */
     @PostConstruct
+    @SuppressWarnings("null")
     public void crearUsuarioAdminPorDefecto() {
         if (!usuarioRepository.existsByUsername("admin")) {
             Usuario admin = Usuario.builder()
@@ -66,6 +67,7 @@ public class UsuarioService implements UserDetailsService {
     /**
      * Crear nuevo usuario
      */
+    @SuppressWarnings("null")
     public Usuario crearUsuario(String username, String password, String nombre, String email, Usuario.Rol rol) {
         if (usuarioRepository.existsByUsername(username)) {
             throw new RuntimeException("El nombre de usuario ya existe");
@@ -98,6 +100,7 @@ public class UsuarioService implements UserDetailsService {
     /**
      * Activar/desactivar usuario
      */
+    @SuppressWarnings("null")
     public Usuario cambiarEstado(Long id, boolean activo) {
         Usuario usuario = usuarioRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
