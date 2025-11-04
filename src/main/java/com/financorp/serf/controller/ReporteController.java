@@ -25,8 +25,12 @@ public class ReporteController {
     
     @GetMapping("/ventas/mensual")
     public ResponseEntity<Map<String, Object>> reporteMensual(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
         try {
+            // Si no se proporciona fecha, usar la fecha actual
+            if (fecha == null) {
+                fecha = LocalDate.now();
+            }
             Map<String, Object> reporte = reporteFacade.generarReporteMensual(fecha);
             return ResponseEntity.ok(reporte);
         } catch (Exception e) {
@@ -36,8 +40,12 @@ public class ReporteController {
     
     @GetMapping("/ventas/trimestral")
     public ResponseEntity<Map<String, Object>> reporteTrimestral(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
         try {
+            // Si no se proporciona fecha, usar la fecha actual
+            if (fecha == null) {
+                fecha = LocalDate.now();
+            }
             Map<String, Object> reporte = reporteFacade.generarReporteTrimestral(fecha);
             return ResponseEntity.ok(reporte);
         } catch (Exception e) {
@@ -47,8 +55,12 @@ public class ReporteController {
     
     @GetMapping("/ventas/anual")
     public ResponseEntity<Map<String, Object>> reporteAnual(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
         try {
+            // Si no se proporciona fecha, usar la fecha actual
+            if (fecha == null) {
+                fecha = LocalDate.now();
+            }
             Map<String, Object> reporte = reporteFacade.generarReporteAnual(fecha);
             return ResponseEntity.ok(reporte);
         } catch (Exception e) {
@@ -60,6 +72,16 @@ public class ReporteController {
     public ResponseEntity<Map<String, Object>> reporteStock() {
         try {
             Map<String, Object> reporte = reporteFacade.generarReporteStock();
+            return ResponseEntity.ok(reporte);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @GetMapping("/productos/top-vendidos")
+    public ResponseEntity<Map<String, Object>> reporteTopProductos() {
+        try {
+            Map<String, Object> reporte = reporteFacade.generarReporteTopProductos();
             return ResponseEntity.ok(reporte);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

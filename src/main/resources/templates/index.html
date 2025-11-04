@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,9 +39,31 @@
                     <i class="fas fa-bell"></i>
                     <span class="notification-badge">3</span>
                 </button>
-                <div class="user-menu">
+                <div class="user-menu" onclick="toggleUserDropdown()">
                     <i class="fas fa-user-circle"></i>
-                    <span>Admin</span>
+                    <span th:text="${#authentication.name ?: 'Admin'}">Admin</span>
+                    <i class="fas fa-chevron-down"></i>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <div class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span th:text="${#authentication.principal.nombre ?: 'Administrador'}">Administrador</span>
+                        </div>
+                        <div class="dropdown-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span th:text="${#authentication.principal.rol ?: 'ADMIN'}">ADMIN</span>
+                        </div>
+                        <div class="dropdown-separator"></div>
+                        <a href="/perfil" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            Configuración
+                        </a>
+                        <form th:action="@{/logout}" method="post" style="margin: 0;">
+                            <button type="submit" class="dropdown-item logout-btn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Cerrar Sesión
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -205,9 +227,15 @@
         <!-- Reportes Section -->
         <section id="reportes" class="content-section">
             <div class="section-header">
-                <h1>Reportes y Análisis</h1>
+                <h1>📊 Reportes y Análisis</h1>
+                <p>Genere reportes detallados y análisis empresariales del Sistema SERF</p>
+            </div>
+
+            <!-- Reportes Rápidos de Ventas -->
+            <div class="report-category">
+                <h2><i class="fas fa-chart-line"></i> Reportes de Ventas</h2>
                 <div class="report-actions">
-                    <button class="btn btn-info" onclick="generarReporte('mensual')">
+                    <button class="btn btn-primary" onclick="generarReporte('mensual')">
                         <i class="fas fa-calendar-alt"></i>
                         Reporte Mensual
                     </button>
@@ -215,42 +243,112 @@
                         <i class="fas fa-calendar"></i>
                         Reporte Trimestral
                     </button>
-                    <button class="btn btn-info" onclick="generarReporte('anual')">
+                    <button class="btn btn-success" onclick="generarReporte('anual')">
                         <i class="fas fa-calendar-year"></i>
                         Reporte Anual
                     </button>
                 </div>
             </div>
 
+            <!-- Reportes de Inventario y Análisis -->
             <div class="reports-grid">
-                <div class="report-card">
+                <div class="report-card inventory">
+                    <div class="report-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
                     <h3>Reporte de Inventarios</h3>
-                    <p>Stock actual y productos con stock bajo</p>
+                    <p>Análisis completo del stock actual, productos con stock bajo y alertas de inventario</p>
+                    <div class="report-features">
+                        <span class="feature-tag">Stock Actual</span>
+                        <span class="feature-tag">Alertas</span>
+                        <span class="feature-tag">Valorización</span>
+                    </div>
                     <button class="btn btn-outline" onclick="generarReporte('stock')">
-                        <i class="fas fa-download"></i>
-                        Generar
+                        <i class="fas fa-warehouse"></i>
+                        Generar Reporte
                     </button>
                 </div>
 
-                <div class="report-card">
+                <div class="report-card sales">
+                    <div class="report-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
                     <h3>Análisis de Ventas</h3>
-                    <p>Tendencias y patrones de ventas por período</p>
+                    <p>Tendencias, patrones de ventas y métricas de rendimiento por período seleccionado</p>
+                    <div class="report-features">
+                        <span class="feature-tag">Tendencias</span>
+                        <span class="feature-tag">Métricas</span>
+                        <span class="feature-tag">KPIs</span>
+                    </div>
                     <button class="btn btn-outline" onclick="generarReporte('ventas')">
                         <i class="fas fa-chart-line"></i>
                         Ver Análisis
                     </button>
                 </div>
 
-                <div class="report-card">
-                    <h3>Productos Más Vendidos</h3>
-                    <p>Ranking de productos por volumen de ventas</p>
-                    <button class="btn btn-outline" onclick="generarReporte('top-productos')">
+                <div class="report-card ranking">
+                    <div class="report-icon">
                         <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>Ranking de Productos</h3>
+                    <p>Clasificación de productos más relevantes basado en stock y rotación de inventario</p>
+                    <div class="report-features">
+                        <span class="feature-tag">Top 10</span>
+                        <span class="feature-tag">Stock</span>
+                        <span class="feature-tag">Rotación</span>
+                    </div>
+                    <button class="btn btn-outline" onclick="generarReporte('top-productos')">
+                        <i class="fas fa-medal"></i>
                         Ver Ranking
+                    </button>
+                </div>
+
+                <div class="report-card custom">
+                    <div class="report-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h3>Reporte Personalizado</h3>
+                    <p>Próximamente: Genere reportes personalizados con filtros avanzados y métricas específicas</p>
+                    <div class="report-features">
+                        <span class="feature-tag disabled">Filtros</span>
+                        <span class="feature-tag disabled">Custom</span>
+                        <span class="feature-tag disabled">Avanzado</span>
+                    </div>
+                    <button class="btn btn-outline" disabled>
+                        <i class="fas fa-wrench"></i>
+                        Próximamente
                     </button>
                 </div>
             </div>
 
+            <!-- Sección de Configuración de Reportes -->
+            <div class="report-config">
+                <h2><i class="fas fa-sliders-h"></i> Configuración de Reportes</h2>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label>Formato de Fecha:</label>
+                        <select id="date-format">
+                            <option value="dd/MM/yyyy">DD/MM/YYYY</option>
+                            <option value="MM/dd/yyyy">MM/DD/YYYY</option>
+                            <option value="yyyy-MM-dd">YYYY-MM-DD</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label>Moneda de Reporte:</label>
+                        <select id="report-currency">
+                            <option value="EUR" selected>EUR (Euro)</option>
+                            <option value="USD">USD (Dólar)</option>
+                            <option value="PEN">PEN (Sol)</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label>Incluir Metadatos:</label>
+                        <input type="checkbox" id="include-metadata" checked>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados de Reportes -->
             <div class="report-results" id="report-results">
                 <!-- Los resultados de reportes se mostrarán aquí -->
             </div>

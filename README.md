@@ -47,12 +47,15 @@ SERF es un sistema empresarial robusto diseñado para **FinanCorp S.A.**, que pe
 - ✅ **Trazabilidad completa**: Vendedor, cliente, método de pago
 - ✅ **Actualización automática**: Stock actualizado en tiempo real
 
-### 📊 Sistema de Reportes
-- ✅ **Exportación CSV**: Datos completos descargables
-- ✅ **Reportes para impresión**: Formato corporativo profesional
-- ✅ **Dashboard en tiempo real**: Métricas y KPIs actualizados
+### 📊 Sistema de Reportes Avanzado
+- ✅ **Reportes de Ventas**: Mensual, trimestral, anual con análisis detallado
+- ✅ **Inventario y Stock**: Alertas automáticas de stock bajo
+- ✅ **Top Productos**: Ranking de productos más vendidos por período
+- ✅ **Exportación Multi-formato**: CSV y PDF con diseño corporativo
+- ✅ **Dashboard interactivo**: Gráficos y métricas en tiempo real
 - ✅ **Seguridad documental**: Marcas de agua y firmas digitales SHA-256
-- ✅ **Reportes por período**: Mensual, trimestral, anual
+- ✅ **Configuración personalizable**: Formatos de fecha y moneda
+- ✅ **Interfaz mejorada**: Tarjetas categorializadas con iconografía
 
 ### 🎨 Interfaz de Usuario
 - ✅ **Diseño responsive**: Compatible con desktop, tablet, móvil
@@ -163,6 +166,15 @@ POST   /api/ventas                 # Registrar nueva venta
 GET    /api/ventas/estadisticas    # Obtener estadísticas
 GET    /api/ventas/pais/{pais}     # Ventas por país
 GET    /api/ventas/fecha           # Ventas por rango de fechas
+```
+
+### Reportes
+```http
+GET    /api/reportes/ventas/mensual      # Reporte mensual de ventas
+GET    /api/reportes/ventas/trimestral   # Reporte trimestral de ventas
+GET    /api/reportes/ventas/anual        # Reporte anual de ventas
+GET    /api/reportes/productos/stock     # Reporte de inventarios
+GET    /api/reportes/productos/top-vendidos  # Top productos más vendidos
 ```
 
 ### Ejemplos de Uso

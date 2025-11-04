@@ -1,18 +1,20 @@
 package com.financorp.serf.service;
 
-import com.financorp.serf.model.Venta;
-import com.financorp.serf.model.Producto;
-import com.financorp.serf.repository.VentaRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+
+import org.springframework.stereotype.Service;
+
+import com.financorp.serf.model.Producto;
+import com.financorp.serf.model.Venta;
+import com.financorp.serf.repository.VentaRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +74,39 @@ public class ReporteService {
         reporte.put("productosBajoStock", bajoStock.size());
         reporte.put("productos", productos);
         reporte.put("alertasBajoStock", bajoStock);
+        
+        return reporte;
+    }
+    
+    public Map<String, Object> generarReporteTopProductos() {
+        // Obtener ventas del último mes para calcular productos más vendidos
+        LocalDate fechaFin = LocalDate.now();
+        LocalDate fechaInicio = fechaFin.minusMonths(1);
+        
+        LocalDateTime inicio = fechaInicio.atStartOfDay();
+        LocalDateTime fin = fechaFin.atTime(23, 59, 59);
+        
+        List<Venta> ventas = ventaRepository.findByFechaVentaBetween(inicio, fin);
+        
+        // Agrupar ventas por producto y calcular totales
+        Map<Producto, Integer> ventasPorProducto = new HashMap<>();
+        Map<Producto, BigDecimal> ingresosPorProducto = new HashMap<>();
+        
+        for (Venta venta : ventas) {
+            Producto producto = venta.getProducto();
+            if (producto != null) {
+                ventasPorProducto.merge(producto, venta.getCantidad(), (a, b) -> a + b);
+                ingresosPorProducto.merge(producto, venta.getTotalVentaEUR(), BigDecimal::add);
+            }
+        }
+        
+        Map<String, Object> reporte = new HashMap<>();
+        reporte.put("periodo", "Último mes");
+        reporte.put("fechaInicio", fechaInicio);
+        reporte.put("fechaFin", fechaFin);
+        reporte.put("totalVentas", ventas.size());
+        reporte.put("ventasPorProducto", ventasPorProducto);
+        reporte.put("ingresosPorProducto", ingresosPorProducto);
         
         return reporte;
     }

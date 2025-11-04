@@ -393,71 +393,254 @@ async function generarReporte(tipo) {
         showLoading(true);
         let endpoint = '';
         let title = '';
+        let params = '';
+        
+        // Usar la fecha actual como parámetro por defecto
+        const fechaActual = new Date().toISOString().split('T')[0];
         
         switch(tipo) {
             case 'mensual':
-                endpoint = '/reportes/mensual';
-                title = 'Reporte Mensual';
+                endpoint = '/reportes/ventas/mensual';
+                params = `?fecha=${fechaActual}`;
+                title = 'Reporte Mensual de Ventas';
                 break;
             case 'trimestral':
-                endpoint = '/reportes/trimestral';
-                title = 'Reporte Trimestral';
+                endpoint = '/reportes/ventas/trimestral';
+                params = `?fecha=${fechaActual}`;
+                title = 'Reporte Trimestral de Ventas';
                 break;
             case 'anual':
-                endpoint = '/reportes/anual';
-                title = 'Reporte Anual';
+                endpoint = '/reportes/ventas/anual';
+                params = `?fecha=${fechaActual}`;
+                title = 'Reporte Anual de Ventas';
                 break;
             case 'stock':
-                endpoint = '/reportes/stock';
+                endpoint = '/reportes/productos/stock';
                 title = 'Reporte de Inventarios';
+                break;
+            case 'ventas':
+                // Mostrar análisis de ventas del último mes
+                endpoint = '/reportes/ventas/mensual';
+                params = `?fecha=${fechaActual}`;
+                title = 'Análisis de Ventas';
+                break;
+            case 'top-productos':
+                // Generar ranking basado en ventas reales
+                endpoint = '/reportes/productos/top-vendidos';
+                title = 'Productos Más Vendidos';
                 break;
         }
         
-        const reporte = await fetchAPI(endpoint);
-        displayReporte(reporte, title);
+        const reporte = await fetchAPI(endpoint + params);
+        displayReporte(reporte, title, tipo);
         
     } catch (error) {
         console.error('Error generando reporte:', error);
-        showToast('Error generando el reporte', 'error');
+        showToast('Error generando el reporte. Verifique que hay datos disponibles.', 'error');
     } finally {
         showLoading(false);
     }
 }
 
-function displayReporte(reporte, title) {
+function displayReporte(reporte, title, tipo) {
     const resultsContainer = document.getElementById('report-results');
     
-    resultsContainer.innerHTML = `
-        <h3>${title}</h3>
-        <div class="report-content">
+    let contenidoEspecifico = '';
+    
+    if (tipo === 'stock') {
+        // Mostrar reporte de inventarios
+        contenidoEspecifico = `
             <div class="report-section">
-                <h4>Resumen</h4>
-                <p><strong>Período:</strong> ${reporte.periodo || 'No especificado'}</p>
-                <p><strong>Total de Componentes:</strong> ${reporte.componentes?.length || 0}</p>
-                <p><strong>Fecha de Generación:</strong> ${formatDateTime(new Date())}</p>
+                <h4>Estadísticas de Inventario</h4>
+                <div class="stats-grid">
+                    <div class="report-stat">
+                        <h5>Total de Productos</h5>
+                        <p class="stat-number">${reporte.totalProductos || 0}</p>
+                    </div>
+                    <div class="report-stat alert">
+                        <h5>Productos con Stock Bajo</h5>
+                        <p class="stat-number">${reporte.productosBajoStock || 0}</p>
+                    </div>
+                </div>
             </div>
             
-            ${reporte.componentes && reporte.componentes.length > 0 ? `
+            ${reporte.alertasBajoStock && reporte.alertasBajoStock.length > 0 ? `
                 <div class="report-section">
-                    <h4>Detalles</h4>
-                    <div class="report-items">
-                        ${reporte.componentes.map(componente => `
-                            <div class="report-item">
-                                <p><strong>${componente.titulo || 'Item'}:</strong> ${componente.contenido || 'Sin contenido'}</p>
-                            </div>
-                        `).join('')}
+                    <h4>Alertas de Stock Bajo</h4>
+                    <div class="table-container">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Producto</th>
+                                    <th>Stock Actual</th>
+                                    <th>Precio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${reporte.alertasBajoStock.map(producto => `
+                                    <tr>
+                                        <td>${producto.codigo}</td>
+                                        <td>${producto.nombre}</td>
+                                        <td class="text-danger"><strong>${producto.stockActual}</strong></td>
+                                        <td>€${producto.precioVentaSugerido.toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             ` : ''}
+        `;
+    } else if (tipo === 'top-productos') {
+        // Mostrar productos más vendidos
+        const periodo = reporte.fechaInicio && reporte.fechaFin 
+            ? `${formatDate(reporte.fechaInicio)} - ${formatDate(reporte.fechaFin)}`
+            : 'Último mes';
             
-            <div class="report-actions mt-2">
-                <button class="btn btn-primary" onclick="exportReporte('${title}')">
+        let productosVendidos = [];
+        if (reporte.ventasPorProducto) {
+            // Convertir el mapa a un array ordenado por cantidad vendida
+            productosVendidos = Object.entries(reporte.ventasPorProducto)
+                .map(([producto, cantidad]) => ({
+                    producto: JSON.parse(producto), // Si viene como string JSON
+                    cantidad: cantidad
+                }))
+                .sort((a, b) => b.cantidad - a.cantidad)
+                .slice(0, 10);
+        }
+        
+        contenidoEspecifico = `
+            <div class="report-section">
+                <h4>Estadísticas del Período</h4>
+                <div class="stats-grid">
+                    <div class="report-stat success">
+                        <h5>Total de Ventas</h5>
+                        <p class="stat-number">${reporte.totalVentas || 0}</p>
+                    </div>
+                    <div class="report-stat">
+                        <h5>Período Analizado</h5>
+                        <p class="stat-number" style="font-size: 1rem;">${periodo}</p>
+                    </div>
+                </div>
+            </div>
+            
+            ${productosVendidos.length > 0 ? `
+                <div class="report-section">
+                    <h4>Top 10 Productos Más Vendidos</h4>
+                    <div class="table-container">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Ranking</th>
+                                    <th>Código</th>
+                                    <th>Producto</th>
+                                    <th>Unidades Vendidas</th>
+                                    <th>Ingresos Generados</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${productosVendidos.map((item, index) => `
+                                    <tr>
+                                        <td>
+                                            <strong style="color: ${index < 3 ? '#f59e0b' : '#6b7280'}">
+                                                #${index + 1}
+                                                ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}
+                                            </strong>
+                                        </td>
+                                        <td>${item.producto?.codigo || 'N/A'}</td>
+                                        <td>${item.producto?.nombre || 'Producto no disponible'}</td>
+                                        <td class="text-success"><strong>${item.cantidad}</strong></td>
+                                        <td>€${((reporte.ingresosPorProducto && reporte.ingresosPorProducto[JSON.stringify(item.producto)]) || 0).toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ` : `
+                <div class="report-section">
+                    <div class="alert alert-info">
+                        <h4>📊 Sin datos de ventas</h4>
+                        <p>No se encontraron ventas en el período analizado. Los productos más vendidos se mostrarán cuando haya datos de ventas disponibles.</p>
+                    </div>
+                </div>
+            `}
+        `;
+    } else {
+        // Mostrar reporte de ventas
+        const periodo = reporte.fechaInicio && reporte.fechaFin 
+            ? `${formatDate(reporte.fechaInicio)} - ${formatDate(reporte.fechaFin)}`
+            : 'Período actual';
+            
+        contenidoEspecifico = `
+            <div class="report-section">
+                <h4>Estadísticas de Ventas</h4>
+                <div class="stats-grid">
+                    <div class="report-stat">
+                        <h5>Total de Ventas</h5>
+                        <p class="stat-number">${reporte.totalVentas || 0}</p>
+                    </div>
+                    <div class="report-stat success">
+                        <h5>Monto Total</h5>
+                        <p class="stat-number">€${(reporte.montoTotal || 0).toFixed(2)}</p>
+                    </div>
+                </div>
+                <p><strong>Período:</strong> ${periodo}</p>
+            </div>
+            
+            ${reporte.ventas && reporte.ventas.length > 0 ? `
+                <div class="report-section">
+                    <h4>Detalle de Ventas (Últimas 10)</h4>
+                    <div class="table-container">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Factura</th>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Cantidad</th>
+                                    <th>Total (EUR)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${reporte.ventas.slice(0, 10).map(venta => `
+                                    <tr>
+                                        <td>${venta.numeroFactura}</td>
+                                        <td>${formatDate(venta.fechaVenta)}</td>
+                                        <td>${venta.cliente || 'No especificado'}</td>
+                                        <td>${venta.cantidad}</td>
+                                        <td>€${(venta.totalVentaEUR || 0).toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ` : ''}
+        `;
+    }
+    
+    resultsContainer.innerHTML = `
+        <div class="report-header">
+            <h3><i class="fas fa-chart-bar"></i> ${title}</h3>
+            <p class="report-date">Generado el ${formatDateTime(new Date())}</p>
+        </div>
+        <div class="report-content">
+            ${contenidoEspecifico}
+            
+            <div class="report-actions">
+                <button class="btn btn-primary" onclick="exportarReporteCSV('${title}', '${tipo}')">
                     <i class="fas fa-download"></i>
-                    Exportar PDF
+                    Exportar CSV
                 </button>
                 <button class="btn btn-outline" onclick="printReporte()">
                     <i class="fas fa-print"></i>
                     Imprimir
+                </button>
+                <button class="btn btn-success" onclick="generarReportePDF('${title}', '${tipo}')">
+                    <i class="fas fa-file-pdf"></i>
+                    Generar PDF
                 </button>
             </div>
         </div>
@@ -741,25 +924,27 @@ function debounce(func, wait) {
     };
 }
 
-async function exportReporte(title) {
+async function exportarReporteCSV(title, tipo) {
     try {
+        showLoading(true);
         let data = [];
         let filename = 'reporte_serf';
         
-        if (currentSection === 'productos') {
-            data = await fetchAPI('/productos');
-            filename = 'productos_serf';
-        } else if (currentSection === 'ventas') {
-            data = await fetchAPI('/ventas');
-            filename = 'ventas_serf';
-        } else if (currentSection === 'reportes') {
-            data = await fetchAPI('/reportes');
-            filename = 'reportes_serf';
-        } else {
-            // Exportar dashboard con estadísticas
-            const stats = await fetchAPI('/ventas/estadisticas');
-            data = [stats];
-            filename = 'dashboard_serf';
+        // Obtener datos según el tipo de reporte
+        switch(tipo) {
+            case 'stock':
+                data = await fetchAPI('/productos');
+                filename = 'inventario_serf';
+                break;
+            case 'top-productos':
+                data = await fetchAPI('/productos');
+                filename = 'top_productos_serf';
+                break;
+            default:
+                // Para reportes de ventas
+                data = await fetchAPI('/ventas');
+                filename = 'ventas_serf';
+                break;
         }
         
         if (data.length === 0) {
@@ -775,6 +960,253 @@ async function exportReporte(title) {
     } catch (error) {
         console.error('Error exportando reporte:', error);
         showToast('Error al exportar reporte', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function generarReportePDF(title, tipo) {
+    try {
+        showLoading(true);
+        
+        // Crear ventana nueva para generar el PDF
+        const printWindow = window.open('', '_blank');
+        const currentDate = new Date().toLocaleDateString('es-ES');
+        
+        let data = {};
+        switch(tipo) {
+            case 'stock':
+                data = await fetchAPI('/reportes/productos/stock');
+                break;
+            case 'top-productos':
+                data = await fetchAPI('/reportes/productos/stock');
+                break;
+            default:
+                const fechaActual = new Date().toISOString().split('T')[0];
+                data = await fetchAPI(`/reportes/ventas/mensual?fecha=${fechaActual}`);
+                break;
+        }
+        
+        let pdfContent = `
+            <html>
+            <head>
+                <title>${title} - SERF</title>
+                <style>
+                    body { 
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                        margin: 0; 
+                        padding: 20px; 
+                        background-color: #f8f9fa; 
+                    }
+                    .container { 
+                        max-width: 800px; 
+                        margin: 0 auto; 
+                        background: white; 
+                        padding: 30px; 
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    }
+                    .header { 
+                        text-align: center; 
+                        margin-bottom: 30px; 
+                        padding-bottom: 20px;
+                        border-bottom: 3px solid #2c3e50; 
+                    }
+                    .header h1 { 
+                        color: #2c3e50; 
+                        margin: 0; 
+                        font-size: 2.5em;
+                        font-weight: 300;
+                    }
+                    .header .subtitle {
+                        color: #7f8c8d;
+                        font-size: 1.2em;
+                        margin: 10px 0;
+                    }
+                    .stats-grid { 
+                        display: grid; 
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+                        gap: 20px; 
+                        margin: 30px 0; 
+                    }
+                    .stat-card { 
+                        padding: 20px; 
+                        border: 2px solid #ecf0f1; 
+                        border-radius: 8px; 
+                        text-align: center;
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    }
+                    .stat-card h3 { 
+                        margin: 0 0 10px 0; 
+                        color: #2c3e50; 
+                        font-size: 1.8em;
+                        font-weight: bold;
+                    }
+                    .stat-card p { 
+                        margin: 0; 
+                        color: #7f8c8d; 
+                        font-weight: 500;
+                    }
+                    table { 
+                        width: 100%; 
+                        border-collapse: collapse; 
+                        margin: 20px 0; 
+                        background: white;
+                    }
+                    th, td { 
+                        border: 1px solid #bdc3c7; 
+                        padding: 12px 8px; 
+                        text-align: left; 
+                        font-size: 0.9em;
+                    }
+                    th { 
+                        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
+                        color: white; 
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 0.8em;
+                        letter-spacing: 0.5px;
+                    }
+                    .footer { 
+                        margin-top: 40px; 
+                        padding-top: 20px;
+                        border-top: 2px solid #ecf0f1;
+                        text-align: center; 
+                        font-size: 0.9em; 
+                        color: #7f8c8d; 
+                    }
+                    .company-info {
+                        font-size: 1.1em;
+                        color: #2c3e50;
+                        font-weight: 500;
+                    }
+                    .danger { color: #e74c3c; font-weight: bold; }
+                    .success { color: #27ae60; font-weight: bold; }
+                    .section-title {
+                        font-size: 1.4em;
+                        color: #2c3e50;
+                        margin: 30px 0 15px 0;
+                        padding-bottom: 10px;
+                        border-bottom: 2px solid #ecf0f1;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>📊 ${title}</h1>
+                        <p class="subtitle company-info">Sistema Empresarial de Gestión de Reportes Financieros (SERF)</p>
+                        <p class="company-info"><strong>FinanCorp S.A.</strong></p>
+                        <p>Fecha de generación: ${currentDate}</p>
+                    </div>
+        `;
+        
+        // Agregar contenido específico según el tipo
+        if (tipo === 'stock') {
+            pdfContent += `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>${data.totalProductos || 0}</h3>
+                            <p>Total de Productos</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 class="danger">${data.productosBajoStock || 0}</h3>
+                            <p>Productos con Stock Bajo</p>
+                        </div>
+                    </div>
+                    
+                    ${data.alertasBajoStock && data.alertasBajoStock.length > 0 ? `
+                        <h2 class="section-title">⚠️ Alertas de Stock Bajo</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Producto</th>
+                                    <th>Stock Actual</th>
+                                    <th>Precio (EUR)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.alertasBajoStock.map(producto => `
+                                    <tr>
+                                        <td>${producto.codigo}</td>
+                                        <td>${producto.nombre}</td>
+                                        <td class="danger">${producto.stockActual}</td>
+                                        <td>€${producto.precioVentaSugerido.toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    ` : ''}
+            `;
+        } else {
+            // Reporte de ventas
+            pdfContent += `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>${data.totalVentas || 0}</h3>
+                            <p>Total de Ventas</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 class="success">€${(data.montoTotal || 0).toFixed(2)}</h3>
+                            <p>Monto Total</p>
+                        </div>
+                    </div>
+                    
+                    ${data.ventas && data.ventas.length > 0 ? `
+                        <h2 class="section-title">💼 Detalle de Ventas</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Factura</th>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Cantidad</th>
+                                    <th>Total (EUR)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.ventas.slice(0, 15).map(venta => `
+                                    <tr>
+                                        <td>${venta.numeroFactura}</td>
+                                        <td>${new Date(venta.fechaVenta).toLocaleDateString('es-ES')}</td>
+                                        <td>${venta.cliente || 'No especificado'}</td>
+                                        <td>${venta.cantidad}</td>
+                                        <td class="success">€${(venta.totalVentaEUR || 0).toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    ` : ''}
+            `;
+        }
+        
+        pdfContent += `
+                    <div class="footer">
+                        <p><strong>Generado por SERF</strong> - Sistema Empresarial de Gestión de Reportes Financieros</p>
+                        <p>© ${new Date().getFullYear()} FinanCorp S.A. - Todos los derechos reservados</p>
+                        <p><em>Documento generado automáticamente el ${new Date().toLocaleString('es-ES')}</em></p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+        
+        printWindow.document.write(pdfContent);
+        printWindow.document.close();
+        
+        // Esperar a que cargue y luego mostrar diálogo de impresión
+        setTimeout(() => {
+            printWindow.print();
+        }, 1000);
+        
+        showToast('Reporte PDF generado. Use Ctrl+P para imprimir o guardar como PDF.', 'success');
+        
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        showToast('Error al generar PDF', 'error');
+    } finally {
+        showLoading(false);
     }
 }
 
@@ -944,19 +1376,49 @@ function downloadCSV(csvContent, filename) {
     }
 }
 
+// ===== FUNCIONES ADICIONALES PARA ESTADÍSTICAS =====
+async function updateStats() {
+    try {
+        if (currentSection === 'dashboard') {
+            loadDashboardData();
+        }
+    } catch (error) {
+        console.error('Error actualizando estadísticas:', error);
+    }
+}
+
 // ===== CONFIGURACIÓN ADICIONAL =====
 
 // Agregar estilos CSS adicionales dinámicamente si es necesario
 const additionalStyles = `
     .report-content {
-        max-height: 400px;
+        max-height: 600px;
         overflow-y: auto;
     }
     
-    .report-section {
-        margin-bottom: 1.5rem;
+    .report-header {
+        margin-bottom: 2rem;
         padding-bottom: 1rem;
-        border-bottom: 1px solid var(--gray-200);
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .report-header h3 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+    
+    .report-date {
+        margin: 0.5rem 0 0 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .report-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
     }
     
     .report-section:last-child {
@@ -964,37 +1426,165 @@ const additionalStyles = `
     }
     
     .report-section h4 {
-        font-size: var(--font-size-lg);
+        font-size: 1.25rem;
         font-weight: 600;
-        margin-bottom: 0.75rem;
-        color: var(--gray-900);
+        margin-bottom: 1rem;
+        color: #495057;
     }
     
-    .report-item {
-        background: var(--gray-50);
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .report-stat {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .report-stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .report-stat.success {
+        border-color: #28a745;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    }
+    
+    .report-stat.alert {
+        border-color: #dc3545;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    }
+    
+    .report-stat h5 {
+        margin: 0 0 0.5rem 0;
+        color: #495057;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-number {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .report-table th {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        padding: 1rem 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .report-table td {
         padding: 0.75rem;
-        border-radius: var(--border-radius);
-        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .report-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .text-danger {
+        color: #dc3545 !important;
+        font-weight: bold;
+    }
+    
+    .text-success {
+        color: #28a745 !important;
+        font-weight: bold;
     }
     
     .report-actions {
         display: flex;
-        gap: 1rem;
+        gap: 0.75rem;
         justify-content: flex-end;
-        margin-top: 1rem;
+        margin-top: 2rem;
         padding-top: 1rem;
-        border-top: 1px solid var(--gray-200);
+        border-top: 2px solid #e9ecef;
+        flex-wrap: wrap;
+    }
+    
+    .report-actions .btn {
+        min-width: 140px;
     }
     
     .btn-sm {
         padding: 0.5rem 0.75rem;
-        font-size: var(--font-size-xs);
+        font-size: 0.8rem;
     }
     
     .toast-content p {
         margin: 0;
-        font-size: var(--font-size-sm);
+        font-size: 0.9rem;
         font-weight: 500;
+    }
+    
+    #report-results {
+        display: none;
+        margin-top: 2rem;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    #report-results.show {
+        display: block;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .table-container {
+        overflow-x: auto;
+        margin: 1rem 0;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .report-actions {
+            justify-content: center;
+        }
+        
+        .report-actions .btn {
+            min-width: auto;
+            flex: 1;
+        }
     }
 `;
 
@@ -1002,5 +1592,55 @@ const additionalStyles = `
 const styleSheet = document.createElement('style');
 styleSheet.textContent = additionalStyles;
 document.head.appendChild(styleSheet);
+
+// ===== FUNCIONES DE AUTENTICACIÓN =====
+function toggleUserDropdown() {
+    const dropdown = document.getElementById('user-dropdown');
+    const userMenu = document.querySelector('.user-menu');
+    
+    if (dropdown.classList.contains('show')) {
+        closeUserDropdown();
+    } else {
+        openUserDropdown();
+    }
+}
+
+function openUserDropdown() {
+    const dropdown = document.getElementById('user-dropdown');
+    const userMenu = document.querySelector('.user-menu');
+    
+    dropdown.classList.add('show');
+    userMenu.classList.add('active');
+    
+    // Cerrar cuando se haga click fuera
+    setTimeout(() => {
+        document.addEventListener('click', handleOutsideClick);
+    }, 100);
+}
+
+function closeUserDropdown() {
+    const dropdown = document.getElementById('user-dropdown');
+    const userMenu = document.querySelector('.user-menu');
+    
+    dropdown.classList.remove('show');
+    userMenu.classList.remove('active');
+    
+    document.removeEventListener('click', handleOutsideClick);
+}
+
+function handleOutsideClick(event) {
+    const userMenu = document.querySelector('.user-menu');
+    
+    if (!userMenu.contains(event.target)) {
+        closeUserDropdown();
+    }
+}
+
+// Cerrar dropdown con ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeUserDropdown();
+    }
+});
 
 console.log('🚀 SERF Sistema - Aplicación inicializada correctamente');

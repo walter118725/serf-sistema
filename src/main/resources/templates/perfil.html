@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERF Sistema - Perfil de Usuario</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-chart-line"></i>
+                <span>SERF Sistema</span>
+            </div>
+            <nav class="navbar-menu">
+                <a href="/" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="/#productos" class="nav-link">
+                    <i class="fas fa-box"></i>
+                    Productos
+                </a>
+                <a href="/#ventas" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    Ventas
+                </a>
+                <a href="/#reportes" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    Reportes
+                </a>
+            </nav>
+            <div class="navbar-actions">
+                <button class="btn-notification">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="user-menu" onclick="toggleUserDropdown()">
+                    <i class="fas fa-user-circle"></i>
+                    <span th:text="${#authentication.name ?: 'Admin'}">Admin</span>
+                    <i class="fas fa-chevron-down"></i>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <div class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span th:text="${#authentication.principal.nombre ?: 'Administrador'}">Administrador</span>
+                        </div>
+                        <div class="dropdown-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span th:text="${#authentication.principal.rol ?: 'ADMIN'}">ADMIN</span>
+                        </div>
+                        <div class="dropdown-separator"></div>
+                        <a href="/perfil" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            Configuración
+                        </a>
+                        <form th:action="@{/logout}" method="post" style="margin: 0;">
+                            <button type="submit" class="dropdown-item logout-btn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Cerrar Sesión
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="section-header">
+            <h1><i class="fas fa-user-cog"></i> Perfil de Usuario</h1>
+            <p>Configuración de cuenta y preferencias del sistema</p>
+        </div>
+
+        <div class="profile-container">
+            <!-- Información del Usuario -->
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h2 th:text="${usuario?.nombre ?: 'Administrador del Sistema'}">Administrador del Sistema</h2>
+                        <p th:text="${usuario?.email ?: 'admin@financorp.com'}">admin@financorp.com</p>
+                        <span class="role-badge" th:text="${usuario?.rol ?: 'ADMIN'}">ADMIN</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas de Usuario -->
+            <div class="profile-stats">
+                <h3>Estadísticas de Actividad</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h4>Último Acceso</h4>
+                            <p th:text="${usuario?.ultimoAcceso != null ? #temporals.format(usuario.ultimoAcceso, 'dd/MM/yyyy HH:mm') : 'Primer acceso'}">Hoy</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h4>Fecha de Creación</h4>
+                            <p th:text="${usuario?.fechaCreacion != null ? #temporals.format(usuario.fechaCreacion, 'dd/MM/yyyy') : 'Hoy'}">04/11/2025</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-shield-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h4>Estado</h4>
+                            <p th:class="${usuario?.activo ? 'text-success' : 'text-danger'}" 
+                               th:text="${usuario?.activo ? 'Activo' : 'Inactivo'}">Activo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="profile-actions">
+                <h3>Acciones Rápidas</h3>
+                <div class="actions-grid">
+                    <a href="/" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <h4>Ir al Dashboard</h4>
+                        <p>Volver al panel principal</p>
+                    </a>
+                    
+                    <a href="/#reportes" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h4>Generar Reportes</h4>
+                        <p>Acceder a reportes empresariales</p>
+                    </a>
+                    
+                    <div class="action-card" onclick="showChangePasswordModal()">
+                        <div class="action-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <h4>Cambiar Contraseña</h4>
+                        <p>Actualizar credenciales de acceso</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información del Sistema -->
+            <div class="system-info">
+                <h3>Información del Sistema</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <i class="fas fa-server"></i>
+                        <span><strong>Sistema:</strong> SERF v1.0</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-building"></i>
+                        <span><strong>Empresa:</strong> FinanCorp S.A.</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-globe"></i>
+                        <span><strong>Región:</strong> Multi-regional</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span><strong>Seguridad:</strong> Habilitada</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Cambiar Contraseña -->
+    <div id="change-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Cambiar Contraseña</h3>
+                <span class="close" onclick="closeModal('change-password-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="change-password-form">
+                    <div class="form-group">
+                        <label for="currentPassword">Contraseña Actual</label>
+                        <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">Nueva Contraseña</label>
+                        <input type="password" id="newPassword" name="newPassword" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirmar Nueva Contraseña</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('change-password-modal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="changePassword()">Cambiar Contraseña</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- JavaScript -->
+    <script src="/js/app.js"></script>
+    <script>
+        function showChangePasswordModal() {
+            showModal('change-password-modal');
+        }
+        
+        function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('Por favor complete todos los campos', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+            
+            // Simulación de cambio de contraseña (en un sistema real sería una llamada API)
+            showToast('Función de cambio de contraseña no implementada en esta demo', 'info');
+            closeModal('change-password-modal');
+        }
+    </script>
+
+    <style>
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: 1fr;
+        }
+        
+        .profile-card {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .profile-avatar {
+            font-size: 4rem;
+            color: var(--primary-color);
+        }
+        
+        .profile-info h2 {
+            margin: 0 0 0.5rem 0;
+            color: var(--gray-900);
+        }
+        
+        .profile-info p {
+            margin: 0 0 1rem 0;
+            color: var(--gray-600);
+        }
+        
+        .role-badge {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+        }
+        
+        .profile-stats, .profile-actions, .system-info {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .profile-stats h3, .profile-actions h3, .system-info h3 {
+            margin: 0 0 1.5rem 0;
+            color: var(--gray-900);
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .action-card {
+            display: block;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-decoration: none;
+            color: var(--gray-700);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .action-card:hover {
+            background: var(--white);
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+        
+        .action-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .action-card h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--gray-900);
+        }
+        
+        .action-card p {
+            margin: 0;
+            font-size: var(--font-size-sm);
+            color: var(--gray-600);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: var(--border-radius);
+        }
+        
+        .info-item i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

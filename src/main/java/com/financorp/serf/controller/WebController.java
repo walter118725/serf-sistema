@@ -9,20 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class WebController {
     
-    /**
-     * Página principal del sistema SERF
-     * @return nombre de la vista index.html
-     */
-    @GetMapping("/")
-    public String index() {
-        return "index";
-    }
+
     
     /**
      * Dashboard principal del sistema
      * @return vista del dashboard
      */
-    @GetMapping("/dashboard")
+    @GetMapping("/admin/dashboard")
     public String dashboard() {
         return "dashboard";
     }
@@ -31,7 +24,7 @@ public class WebController {
      * Página de gestión de productos
      * @return vista de productos
      */
-    @GetMapping("/productos")
+    @GetMapping("/admin/productos")
     public String productos() {
         return "productos";
     }
@@ -40,7 +33,7 @@ public class WebController {
      * Página de gestión de ventas
      * @return vista de ventas
      */
-    @GetMapping("/ventas")
+    @GetMapping("/admin/ventas")
     public String ventas() {
         return "ventas";
     }
@@ -49,7 +42,7 @@ public class WebController {
      * Página de reportes
      * @return vista de reportes
      */
-    @GetMapping("/reportes")
+    @GetMapping("/admin/reportes")
     public String reportes() {
         return "reportes";
     }

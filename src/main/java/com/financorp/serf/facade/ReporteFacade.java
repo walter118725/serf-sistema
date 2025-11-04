@@ -94,6 +94,24 @@ public class ReporteFacade {
         return reporte;
     }
     
+    public Map<String, Object> generarReporteTopProductos() {
+        Map<String, Object> reporte = reporteService.generarReporteTopProductos();
+        
+        // Agregar metadatos del reporte con seguridad
+        reporte.put("tipoReporte", "TOP_PRODUCTOS");
+        reporte.put("fechaGeneracion", LocalDate.now());
+        reporte.put("formatoFecha", configuracion.getFormatoFechaReportes());
+        reporte.put("empresa", configuracion.getLogoEmpresa());
+        reporte.put("firmaAutorizada", configuracion.getFirmaDigitalAutorizada());
+        reporte.put("monedaCorporativa", configuracion.getMonedaCorporativa());
+        reporte.put("marcaAgua", true);
+        reporte.put("firmaDigital", true);
+        reporte.put("seguridadAplicada", true);
+        reporte.put("hashDocumento", generateSecurityHash(reporte.toString()));
+        
+        return reporte;
+    }
+    
     /**
      * Genera un hash de seguridad para validar la integridad del documento
      */
